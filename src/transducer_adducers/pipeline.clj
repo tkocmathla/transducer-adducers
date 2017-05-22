@@ -9,10 +9,12 @@
     [hickory.core :as hc]
     [hickory.select :as hs :refer [select tag]]))
 
+(def ncpus (.availableProcessors (Runtime/getRuntime)))
+
 (defn pipeline-process [xform xs]
   (let [cin (to-chan xs) cout (chan 1)]
     ;; apply xform from cin -> cout in parallel
-    (pipeline 16 cout xform cin)
+    (pipeline (* ncpus 8) cout xform cin)
     ;; go executes concurrently on a separate thread and returns a channel with the result
     (<!! (go-loop [acc []]
            (let [x (<! cout)]
@@ -26,12 +28,13 @@
 (def xform (comp (map keywordize-keys) 
                  (map :download_url)
                  (map http/get)
-                 (map :body)
+                 (filter (comp #{200} :status))
+                 (keep :body)
                  (map hc/parse)
                  (map hc/as-hickory)
-                 (map (partial select (hs/and (tag :advantage))))))
+                 (mapcat (partial select (hs/and (tag :advantage))))))
 
 (defn time-these [] 
   (let [files (->> adv-url http/get :body json/read-str)]
-    (time (dotimes [_ 1] (into [] xform files)))
-    (time (dotimes [_ 1] (pipeline-process xform files)))))
+    (time (prn (count (into [] xform files))))
+    (time (prn (count (pipeline-process xform files))))))
