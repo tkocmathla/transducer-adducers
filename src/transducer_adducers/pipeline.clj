@@ -1,6 +1,5 @@
 (ns transducer-adducers.pipeline
   (:require
-    [clojure.core.reducers :as r]
     [clojure.core.async :as a 
      :refer [>! <! >!! <!! go go-loop chan to-chan pipeline pipeline-async pipeline-blocking]]
     [clojure.data.json :as json]
