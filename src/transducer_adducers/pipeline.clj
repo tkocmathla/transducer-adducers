@@ -1,7 +1,6 @@
 (ns transducer-adducers.pipeline
   (:require
-    [clojure.core.async :as a 
-     :refer [>! <! >!! <!! go go-loop chan to-chan pipeline pipeline-async pipeline-blocking]]
+    [clojure.core.async :as async :refer [<!! chan to-chan pipeline]]
     [clojure.data.json :as json]
     [clojure.walk :refer [keywordize-keys]]
     [clj-http.client :as http]
@@ -11,15 +10,9 @@
 (def ncpus (.availableProcessors (Runtime/getRuntime)))
 
 (defn pipeline-process [xform xs]
-  (let [cin (to-chan xs) cout (chan 1)]
-    ;; apply xform from cin -> cout in parallel
+  (let [cin (to-chan xs) cout (chan)]
     (pipeline (* ncpus 8) cout xform cin)
-    ;; go executes concurrently on a separate thread and returns a channel with the result
-    (<!! (go-loop [acc []]
-           (let [x (<! cout)]
-             (if-not (nil? x) 
-               (recur (conj acc x))
-               acc))))))
+    (<!! (async/reduce conj [] cout))))
 
 ;; -----------------------------------------------------------------------------
 
