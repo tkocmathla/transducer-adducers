@@ -5,16 +5,29 @@
 
 ;; -----------------------------------------------------------------------------
 
-;; transformations are composed from basic sequence fns
-(def xform (comp (keep printable?) (map char)))
+;; Basic transducer fn shape:
+;;
+;; (fn [xf]
+;;   (fn ([] ...)                ; initialize value
+;;       ([result] ...)          ; produce final value
+;;       ([result input] ...)))  ; reduce, applying xf as appropriate
 
-;; eagerly apply xform, specify a reducing fn and optionally an init val:
+
+;; transformations are composed from basic sequence fns
+;; and can be applied to collections, streams, channels, observables, etc.
+(def xform (comp (keep printable?) 
+                 (map char)))
+
+
+;; eagerly apply xform, specify a reducing fn and optionally an init val
 (transduce xform str (range 0x00 0xff))
 (transduce xform str "Printable: " (range 0x00 0xff))
 
-;; eagerly apply xform and specify a final collection type:
+
+;; eagerly apply xform and specify a final collection type
 (into [] xform (range 0x00 0xff))
 (into #{} xform (range 0x00 0xff))
 
-;; lazily apply xform:
+
+;; lazily apply xform
 (sequence xform (range 0x00 0xff))

@@ -26,6 +26,7 @@
        (r/mapcat (partial select (tag :advantage)))
        (r/fold 1 r/cat r/append!)))
 
+
 (def xform
   (comp (map keywordize-keys)
         (map :download_url)
@@ -35,6 +36,7 @@
         (map hc/parse)
         (map hc/as-hickory)
         (mapcat (partial select (tag :advantage)))))
+
 
 (defn pipeline-process [xform xs]
   (let [cin (to-chan xs) cout (chan)]
