@@ -6,14 +6,14 @@
     [clojure.walk :refer [keywordize-keys]]
     [clj-http.client :as http]
     [hickory.core :as hc]
-    [hickory.select :as hs :refer [select tag]]))
+    [hickory.select :as hs :refer [select tag]]
+    [transducer-adducers.async :refer [preduce]]))
 
-(def ncpus (.availableProcessors (Runtime/getRuntime)))
 (def adv-url "https://api.github.com/repos/richardwilkes/gcs_library/contents/Library/Advantages")
 
 ;; -----------------------------------------------------------------------------
 
-;; reducers partition the collection and transform the partitions in parallel
+;; reducers partition the collection and can transform the partitions in parallel
 (defn reducer [coll]
   (->> coll
        (r/map keywordize-keys)
@@ -37,16 +37,10 @@
         (map hc/as-hickory)
         (mapcat (partial select (tag :advantage)))))
 
-
-(defn pipeline-process [xform xs]
-  (let [cin (to-chan xs) cout (chan)]
-    (pipeline (* ncpus 8) cout xform cin)
-    (<!! (async/reduce conj [] cout))))
-
 ;; -----------------------------------------------------------------------------
 
-(defn time-these [] 
+(defn time-these []
   (let [files (->> adv-url http/get :body json/read-str)]
     (time (prn (count (into [] xform files))))
     (time (prn (count (reducer files))))
-    (time (prn (count (pipeline-process xform files))))))
+    (time (prn (count (preduce xform conj [] files))))))

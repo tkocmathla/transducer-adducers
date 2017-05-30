@@ -7,9 +7,9 @@
 ;; 
 ;; in this case, take returns a stateful transducer fn
 ;; and conj is passed to it as the reducing fn.
-(let [xform ((take 10) conj)] 
-  (reduce xform [] (range 100))  ; => [0 1 2 3 4 5 6 7 8 9]
-  (reduce xform [] (range 100))) ; => [] ; oh noes!
+(let [rf ((take 10) conj)]
+  (reduce rf [] (range 100))  ; => [0 1 2 3 4 5 6 7 8 9]
+  (reduce rf [] (range 100))) ; => [] ; oh noes!
 
 
 ;; transduce separates the transforming fn from the reducing fn,
@@ -19,8 +19,8 @@
   (transduce xform conj [] (range 100)))
 
 
-;; eduction captures the transformation in an iterable
-;; and is applied each time it is reduced
+;; eduction captures a transformation to a specific collection
+;; in an iterable and is applied each time it is reduced
 (let [ed (eduction (take 10) (range 100))]
   (reduce conj [] ed)
   (reduce conj [] ed))
