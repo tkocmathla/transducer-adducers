@@ -1,22 +1,37 @@
 (ns transducer-adducers.basics)
 
-;; Basic transducer fn shape:
+;; a transducer is a transformation from one reducing fn to another.
+;; 
+;; transformations are composed from basic sequence fns
+;; and can be applied to collections, streams, channels, observables, etc.
+;;
+;; basic transducer fn shape:
 ;;
 ;; (fn [reducing-fn]
 ;;   (fn ([] ...)                ; initialize value
 ;;       ([result] ...)          ; produce final value by calling reducing-fn 
 ;;       ([result input] ...)))  ; reduce, applying reducing-fn as appropriate
 ;;
-;; a transducer is a transformation from one reducing fn to another.
-;; 
-;; transformations are composed from basic sequence fns
-;; and can be applied to collections, streams, channels, observables, etc.
-;;
-;; recall that comp composes like:
-;;   (comp f g h) => (f (g (h _)))
-;; 
-;; composing a transducer produces a single reducing fn like:
-;;   (comp f g h) => ((f (g h)) _)
+;; a transducer pipeline looks like this:
+;;   transduce -> transduce -> transduce -> ... -> reduce
+
+;; -----------------------------------------------------------------------------
+
+;; a transducer needs a final reducing fn to produce a result
+;; `into' uses conj internally so you don't have to specify one
+
+(def map-xf (map inc))
+(into [] map-xf (range 10))
+
+(def map-filter-xf (comp (map inc) (filter even?)))
+(into [] map-filter-xf (range 10))
+
+;; specify your own reducing fn with transduce, which internally does (xf rf)
+(transduce map-filter-xf + (range 10))
+
+;; or add it to the transducer and then reduce
+(def map-filter-sum (map-filter-xf +))
+(reduce map-filter-sum (range 10))
 
 ;; -----------------------------------------------------------------------------
 

@@ -11,6 +11,9 @@
   (reduce rf [] (range 100))  ; => [0 1 2 3 4 5 6 7 8 9]
   (reduce rf [] (range 100))) ; => [] ; oh noes!
 
+(let [rf ((take 15) conj)]
+  (reduce rf [] (range 10))  ; => [0 1 2 3 4 5 6 7 8 9]
+  (reduce rf [] (range 10))) ; => [0 1 2 3 4] ; wat
 
 ;; transduce separates the transforming fn from the reducing fn,
 ;; and is safe to repeat. 
