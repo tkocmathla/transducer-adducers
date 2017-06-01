@@ -6,7 +6,7 @@
     [clojure.walk :refer [keywordize-keys]]
     [clj-http.client :as http]
     [hickory.core :as hc]
-    [hickory.select :as hs :refer [select tag]]
+    [hickory.select :as hs]
     [transducer-adducers.async :refer [preduce]]))
 
 (def adv-url "https://api.github.com/repos/richardwilkes/gcs_library/contents/Library/Advantages")
@@ -23,7 +23,7 @@
        (r/map :body)
        (r/map hc/parse)
        (r/map hc/as-hickory)
-       (r/mapcat (partial select (tag :advantage)))
+       (r/mapcat (partial hs/select (hs/tag :advantage)))
        (r/fold 1 r/cat r/append!)))
 
 
@@ -35,7 +35,7 @@
         (keep :body)
         (map hc/parse)
         (map hc/as-hickory)
-        (mapcat (partial select (tag :advantage)))))
+        (mapcat (partial hs/select (hs/tag :advantage)))))
 
 ;; -----------------------------------------------------------------------------
 

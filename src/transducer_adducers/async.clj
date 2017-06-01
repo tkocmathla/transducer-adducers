@@ -18,7 +18,7 @@
   (take-while identity (repeatedly #(<!! ch))))
 
 
-;; parallel reduce is possible with async/pipeline
+;; parallel reduce is possible with async/pipeline!
 (defn preduce
   [xform rf init coll]
   (let [source-chan (to-chan coll)

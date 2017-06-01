@@ -3,7 +3,7 @@
 ;; most transducer fns take a reducing fn as an argument.
 ;; 
 ;; some sequence fns return a _stateful_ transducer,
-;; which require state to do the reduction. 
+;; which require state to do the reduction (e.g. take, dedupe). 
 ;; 
 ;; in this case, take returns a stateful transducer fn
 ;; and conj is passed to it as the reducing fn.
@@ -13,7 +13,9 @@
 
 
 ;; transduce separates the transforming fn from the reducing fn,
-;; and is safe to repeat
+;; and is safe to repeat. 
+;;
+;; internally, transduce combines them as (xform rf).
 (let [xform (take 10)]
   (transduce xform conj [] (range 100))
   (transduce xform conj [] (range 100)))
